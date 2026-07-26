@@ -11,7 +11,9 @@ set -euo pipefail
 SSH_PORT="2222"
 WG_PORT="51820"
 MODE=""
-PUBKEY="ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIFxQiUZ0HX2cesaI1Hmu4Z+aHEVSVv7qIQ6Bb6ENC1Op"
+# No default — pass --pubkey "ssh-ed25519 AAAA..." explicitly, or the script
+# skips adding an authorized key entirely (see the PUBKEY check below).
+PUBKEY=""
 HONEYPOT=0
 
 # ── Argument parsing ──────────────────────────────────────────────────────────
