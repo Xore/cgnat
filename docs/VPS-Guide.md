@@ -588,11 +588,7 @@ Browser → https://media.xore.rocks
 
 **Example: Flask API on port 5000 → `api.xore.rocks`**
 
-A working example lives in [`cgnat/examples/python-api/`](../examples/python-api/).
-
 ### The Example API
-
-File: [`cgnat/examples/python-api/app.py`](../examples/python-api/app.py)
 
 ```python
 import datetime
@@ -631,10 +627,11 @@ EXPOSE 5000
 CMD ["gunicorn", "--bind", "0.0.0.0:5000", "--workers", "2", "--access-logfile", "-", "app:app"]
 ```
 
-### Step 1 — Copy the Example to Your Home Server
+### Step 1 — Create the Stack on Your Home Server
 
 ```bash
-cp -r cgnat/examples/python-api /opt/stacks/myapi
+mkdir -p /opt/stacks/myapi
+# Save the app.py, requirements.txt, and Dockerfile shown above into it.
 ```
 
 ### Step 2 — Add to Home Server Docker Compose

@@ -44,70 +44,15 @@ cgnat/
 │   ├── README.md                                # Script usage docs
 │   ├── harden-vps.sh                            # VPS hardening checker + applicator
 │   └── harden-homeserver.sh                     # Home server hardening checker + applicator
-└── examples/                                    # One blog system, many backends
+└── examples/
     ├── README.md                                # Examples index
-    ├── python-api/                              # Blog: Flask + Gunicorn, JSON file
-    │   ├── app.py
-    │   ├── gunicorn.conf.py
-    │   ├── static/                              # shared xore//blog frontend
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
-    │   └── README.md
-    ├── static-site/                             # Blog: nginx only, read-only posts.json
-    │   ├── docker-compose.yml
-    │   ├── nginx.conf
-    │   ├── html/                                # frontend + posts.json + /docs/ pages
-    │   └── README.md
-    ├── node-express-api/                        # Blog: Node.js + Express, JSON file
-    │   ├── app.js
-    │   ├── public/                              # shared xore//blog frontend
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
-    │   └── README.md
     ├── reverse-proxy/                           # Passthrough to any LAN host (no app container)
     │   ├── docker-compose.yml
     │   └── README.md
     ├── uptime-kuma/                             # Self-hosted uptime monitoring
     │   ├── docker-compose.yml
     │   └── README.md
-    ├── filebrowser/                             # Web-based file manager
-    │   ├── docker-compose.yml
-    │   └── README.md
-    ├── redis-api/                               # Blog: Flask + Redis storage
-    │   ├── app.py
-    │   ├── gunicorn.conf.py
-    │   ├── static/                              # shared xore//blog frontend
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
-    │   └── README.md
-    ├── csharp-api/                              # Blog: ASP.NET Core 9 + PostgreSQL
-    │   ├── Program.cs
-    │   ├── BlogApi.csproj
-    │   ├── wwwroot/                             # shared xore//blog frontend
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
-    │   └── README.md
-    ├── go-api/                                  # Blog: Go stdlib, scratch image, go:embed
-    │   ├── main.go
-    │   ├── go.mod
-    │   ├── static/                              # embedded at build time
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
-    │   └── README.md
-    ├── rust-api/                                # Blog: Rust + Axum, include_str! embed
-    │   ├── src/main.rs
-    │   ├── Cargo.toml
-    │   ├── static/                              # embedded at build time
-    │   ├── Dockerfile
-    │   ├── docker-compose.yml
-    │   └── README.md
-    ├── vui-blog-auth/                           # Blog: vui-blog + auth-gateway login wall
-    │   ├── auth-gateway/                        # Go reverse proxy (login + HMAC sessions)
-    │   │   ├── main.go  page.go  go.mod  Dockerfile
-    │   ├── src/ app.js …                        # copied vui-blog app
-    │   ├── docker-compose.yml
-    │   └── README.md
-    └── cowrie-gpu/                              # wrapper building from Xore/honeypot-stack
+    └── cowrie-gpu/                              # Cowrie SSH/Telnet honeypot, fake GPU host persona
 ```
 
 ---
@@ -129,25 +74,14 @@ cgnat/
 
 ## Examples
 
-Every app example is the same **xore//blog** system (shared frontend + REST API
-contract), implemented in a different language with a different storage story:
-
-| Example | Port | Backend | Storage |
-|---------|------|---------|---------|
-| [static-site](examples/static-site/) | 8080 | none — nginx, read-only mode | `posts.json` edited by hand |
-| [python-api](examples/python-api/) | 5000 | Flask + Gunicorn | JSON flat file (volume) |
-| [node-express-api](examples/node-express-api/) | 3000 | Node.js + Express | JSON flat file (volume) |
-| [redis-api](examples/redis-api/) | 5001 | Flask + Gunicorn | Redis (sorted-set index) |
-| [csharp-api](examples/csharp-api/) | 5002 | ASP.NET Core 9 minimal API | PostgreSQL via EF Core |
-| [go-api](examples/go-api/) | 5003 | Go stdlib, ~10 MB scratch image | JSON file, frontend embedded |
-| [rust-api](examples/rust-api/) | 5004 | Rust + Axum, static musl binary | JSON file, frontend embedded |
-| [vui-blog](examples/vui-blog/) | 3000 | Express serving a Vue 3 SPA | JSON flat file (volume) |
-| [vui-blog-auth](examples/vui-blog-auth/) | 3000 | vui-blog + login-wall gateway container | JSON flat file (volume) |
-| [svelte-blog](examples/svelte-blog/) | 4174 | SvelteKit 5 server routes | JSON flat file (volume) |
+| Example | Port | Description |
+|---------|------|-------------|
+| [reverse-proxy](examples/reverse-proxy/) | any | Forward traffic to any upstream (no app container needed) |
+| [uptime-kuma](examples/uptime-kuma/) | 3001 | Self-hosted uptime monitoring dashboard |
+| [cowrie-gpu](examples/cowrie-gpu/) | — | Cowrie SSH/Telnet honeypot with a fake GPU-equipped host persona |
 
 Auth & security:
 [Xore/auth-backend](https://github.com/Xore/auth-backend) (optional add-on repo — hardened Traefik forward-auth SSO at auth.<domain> — lockout, 2FA, bot traps) ·
-[vui-blog-auth](examples/vui-blog-auth/) (auth-gateway in front of the blog, + VPS-side auth options) ·
 [honeypot-stack](https://github.com/Xore/honeypot-stack) (separate public
 repository containing the home Dockge stack + VPS gateway:
 Cowrie, multipot, Dionaea, six Conpot/OT personas, HTTP/API decoys,
@@ -158,11 +92,6 @@ Filebeat/Elasticsearch/Kibana, real offline YARA triage, durable alert and
 intelligence state, Prometheus metrics, tested backups, an optional isolated
 KVM/libvirt malware lab, EveBox and Arkime; Suricata runs on
 the VPS public interface)
-
-Infrastructure examples (not blogs):
-[reverse-proxy](examples/reverse-proxy/) ·
-[uptime-kuma](examples/uptime-kuma/) (:3001) ·
-[filebrowser](examples/filebrowser/) (:8070)
 
 Every example includes:
 - A ready-to-run `docker-compose.yml` with a socat bridge

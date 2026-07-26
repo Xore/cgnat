@@ -1,103 +1,18 @@
 version: 2
 updates:
-  # ── npm ──────────────────────────────────────────────────────────────
-  - package-ecosystem: "npm"
-    directory: "/examples/vui-blog-auth"
-    schedule: { interval: "weekly" }
-    open-pull-requests-limit: 10
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "npm"
-    directory: "/examples/node-express-api"
-    schedule: { interval: "weekly" }
-    open-pull-requests-limit: 10
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "npm"
-    directory: "/examples/svelte-runes-playground"
-    schedule: { interval: "weekly" }
-    open-pull-requests-limit: 10
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "npm"
-    directory: "/examples/svelte-blog"
-    schedule: { interval: "weekly" }
-    open-pull-requests-limit: 10
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "npm"
-    directory: "/examples/vui-blog"
-    schedule: { interval: "weekly" }
-    open-pull-requests-limit: 10
-    labels: ["dependencies", "automated"]
-
   # ── Go modules ───────────────────────────────────────────────────────
   - package-ecosystem: "gomod"
-    directory: "/examples/go-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "gomod"
     directory: "/vps/portbridge"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "gomod"
-    directory: "/examples/vui-blog-auth/auth-gateway"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-
-  # ── Python (pip) ─────────────────────────────────────────────────────
-  - package-ecosystem: "pip"
-    directory: "/examples/redis-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "pip"
-    directory: "/examples/python-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-
-  # ── Rust ─────────────────────────────────────────────────────────────
-  - package-ecosystem: "cargo"
-    directory: "/examples/rust-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-
-  # ── .NET (NuGet) ─────────────────────────────────────────────────────
-  - package-ecosystem: "nuget"
-    directory: "/examples/csharp-api"
     schedule: { interval: "weekly" }
     labels: ["dependencies", "automated"]
 
   # ── Docker ───────────────────────────────────────────────────────────
   - package-ecosystem: "docker"
-    directory: "/examples/rust-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
     directory: "/examples/cowrie-gpu"
     schedule: { interval: "weekly" }
     labels: ["dependencies", "automated"]
   - package-ecosystem: "docker"
-    directory: "/examples/go-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
-    directory: "/examples/node-express-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
-    directory: "/examples/csharp-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
-    directory: "/examples/redis-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
-    directory: "/examples/python-api"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
     directory: "/vps/portbridge"
-    schedule: { interval: "weekly" }
-    labels: ["dependencies", "automated"]
-  - package-ecosystem: "docker"
-    directory: "/examples/vui-blog-auth/auth-gateway"
     schedule: { interval: "weekly" }
     labels: ["dependencies", "automated"]
 

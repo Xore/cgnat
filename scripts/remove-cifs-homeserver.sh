@@ -29,7 +29,7 @@ fi
 echo "[2/4] Removing CIFS entries from /etc/fstab..."
 if grep -q 'cifs' /etc/fstab 2>/dev/null; then
   # Backup first
-  cp /etc/fstab /etc/fstab.bak.$(date +%Y%m%d%H%M%S)
+  cp /etc/fstab "/etc/fstab.bak.$(date +%Y%m%d%H%M%S)"
   # Remove all lines that reference cifs
   sed -i '/\bcifs\b/d' /etc/fstab
   echo "  -> CIFS entries removed. Backup saved as /etc/fstab.bak.*"

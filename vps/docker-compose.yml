@@ -72,88 +72,11 @@ services:
   #   networks:
   #     - proxy
 
-  socat-static:
-    image: alpine/socat:latest
-    container_name: socat-static
-    restart: unless-stopped
-    command: TCP4-LISTEN:8080,fork,reuseaddr TCP4:10.8.0.2:8080
-    networks: [proxy]
-
-  socat-python-api:
-    image: alpine/socat:latest
-    container_name: socat-python-api
-    restart: unless-stopped
-    command: TCP4-LISTEN:5000,fork,reuseaddr TCP4:10.8.0.2:5000
-    networks: [proxy]
-
-  socat-redis-api:
-    image: alpine/socat:latest
-    container_name: socat-redis-api
-    restart: unless-stopped
-    command: TCP4-LISTEN:5001,fork,reuseaddr TCP4:10.8.0.2:5001
-    networks: [proxy]
-
-  socat-node-api:
-    image: alpine/socat:latest
-    container_name: socat-node-api
-    restart: unless-stopped
-    command: TCP4-LISTEN:3000,fork,reuseaddr TCP4:10.8.0.2:3000
-    networks: [proxy]
-
   socat-uptime-kuma:
     image: alpine/socat:latest
     container_name: socat-uptime-kuma
     restart: unless-stopped
     command: TCP4-LISTEN:3001,fork,reuseaddr TCP4:10.8.0.2:3001
-    networks: [proxy]
-
-  socat-filebrowser:
-    image: alpine/socat:latest
-    container_name: socat-filebrowser
-    restart: unless-stopped
-    command: TCP4-LISTEN:8070,fork,reuseaddr TCP4:10.8.0.2:8070
-    networks: [proxy]
-
-  socat-vui-blog:
-    image: alpine/socat:latest
-    container_name: socat-vui-blog
-    restart: unless-stopped
-    command: TCP4-LISTEN:3000,fork,reuseaddr TCP4:10.8.0.2:3000
-    networks: [proxy]
-
-  socat-vui-blog-auth:
-    image: alpine/socat:latest
-    container_name: socat-vui-blog-auth
-    restart: unless-stopped
-    command: TCP4-LISTEN:3000,fork,reuseaddr TCP4:10.8.0.2:3000
-    networks: [proxy]
-
-  socat-svelte-blog:
-    image: alpine/socat:latest
-    container_name: socat-svelte-blog
-    restart: unless-stopped
-    command: TCP4-LISTEN:4174,fork,reuseaddr TCP4:10.8.0.2:4174
-    networks: [proxy]
-
-  socat-csharp-api:
-    image: alpine/socat:latest
-    container_name: socat-csharp-api
-    restart: unless-stopped
-    command: TCP4-LISTEN:5002,fork,reuseaddr TCP4:10.8.0.2:5002
-    networks: [proxy]
-
-  socat-go-api:
-    image: alpine/socat:latest
-    container_name: socat-go-api
-    restart: unless-stopped
-    command: TCP4-LISTEN:5003,fork,reuseaddr TCP4:10.8.0.2:5003
-    networks: [proxy]
-
-  socat-rust-api:
-    image: alpine/socat:latest
-    container_name: socat-rust-api
-    restart: unless-stopped
-    command: TCP4-LISTEN:5004,fork,reuseaddr TCP4:10.8.0.2:5004
     networks: [proxy]
 
   socat-upstream:

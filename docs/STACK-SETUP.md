@@ -64,10 +64,9 @@ Grey-cloud (DNS-only) only for raw game/TCP ports.
 
 | Subdomain | Points at | Cloud |
 |---|---|---|
-| `@`, `www`, `static` | apex/static site | 🟠 |
-| `auth` | auth portal | 🟠 |
-| `api`, `node`, `redis-api`, `status`, `files`, `csharp`, `go`, `rust`, `vui`, `svelte`, `ha` | example apps and upstreams | 🟠 |
-| `blog-auth` | vui-blog-auth | 🟠 |
+| `@`, `www` | homepage ([Xore/www](https://github.com/Xore/www), optional) | 🟠 |
+| `auth` | auth portal ([Xore/auth-backend](https://github.com/Xore/auth-backend), optional) | 🟠 |
+| `status`, `ha` (or whatever you pick) | your example apps and upstreams | 🟠 |
 | `decoy`, `www-portal` | HTTP honeypots | 🟠 |
 | `honeypot`/`dashboard`, `kibana`, `tanner`, `evebox`, `arkime` | honeypot investigation UIs (behind auth) | 🟠 |
 | `minecraft` (if used) | game server | ⚪ grey |
@@ -97,19 +96,8 @@ Then browse `https://<subdomain>.xore.rocks`. Reference ports/subdomains:
 
 | Example | Home port | Subdomain |
 |---|---|---|
-| static-site | 8080 | static |
-| python-api | 5000 | api |
-| node-express-api | 3000 | node |
-| redis-api | 5001 | redis-api |
-| csharp-api | 5002 | csharp |
-| go-api | 5003 | go |
-| rust-api | 5004 | rust |
-| vui-blog | 3000 | vui |
-| vui-blog-auth | 3000 | blog-auth |
-| svelte-blog | 4174 | svelte |
-
-> Ports 3000 collide across vui-blog / vui-blog-auth / node-express-api — run
-> only one of them on the home server.
+| reverse-proxy | any | your choice |
+| uptime-kuma | 3001 | status |
 
 ---
 
