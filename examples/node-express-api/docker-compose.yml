@@ -1,0 +1,59 @@
+# Node.js + Express blog (xore//blog frontend + REST API)
+# Dockge: place app.js and the public/ folder in the stack folder
+# (e.g. /opt/stacks/node-express-api/)
+#
+# No Dockerfile needed.
+
+services:
+  node-api:
+    image: node:22-alpine
+    container_name: node-api
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./app.js:/app/app.js:ro
+      - ./public:/app/public:ro
+      # posts.json lives in a volume, not the repo
+      - blog-data:/app/data
+      # node_modules persisted so restarts are instant after first run
+      - node-modules:/app/node_modules
+    # Use a list form so each argument is passed directly — no shell quoting issues
+    command:
+      - sh
+      - -c
+      - "npm install --silent express@4 && node app.js"
+    ports:
+      - 127.0.0.1:3000:3000
+    environment:
+      - NODE_ENV=production
+      - PORT=3000
+      - ADMIN_PASSWORD=change-me-js
+      - DATA_FILE=/app/data/posts.json
+      - TZ=Europe/Berlin
+    # No `user: node`: the named volumes are created root-owned, so uid 1000
+    # could not npm install or write posts.json. Nothing lands on the host.
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3000/health').then(r => process.exit(r.ok ? 0 : 1)).catch(() => process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s   # first start installs npm packages
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 128M
+
+  socat-node-api:
+    image: alpine/socat:latest
+    container_name: socat-node-api
+    restart: unless-stopped
+    command: TCP4-LISTEN:3000,bind=10.8.0.2,fork,reuseaddr TCP4:127.0.0.1:3000
+    network_mode: host
+    depends_on:
+      node-api:
+        condition: service_healthy
+
+volumes:
+  blog-data:
+  node-modules:

@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Setup Guide — CGNAT Gateway</title>
+  <link rel="stylesheet" href="/shared.css" />
+</head>
+<body>
+<div id="content">
+  <h1 class="page-title">Setup Guide</h1>
+  <p class="page-subtitle">From a fresh VPS to a production HTTPS gateway.</p>
+
+  <div class="callout callout-warning">
+    <strong>⚠️ Before you start</strong>
+    Keep a second SSH session open when applying changes — some steps restart sshd or change the SSH port.
+  </div>
+
+  <h2 id="step1">1 — VPS System Prep</h2>
+  <p>Update the system and install base dependencies. <strong>Do not use <code>apt install docker.io</code></strong> — it is outdated.</p>
+  <pre><code>sudo apt update && sudo apt upgrade -y
+sudo apt install -y wireguard wireguard-tools curl ufw \
+  fail2ban unattended-upgrades ca-certificates</code></pre>
+
+  <h2 id="step2">2 — Install Docker Engine</h2>
+  <p>Use Docker's official repository:</p>
+  <pre><code>sudo install -m 0755 -d /etc/apt/keyrings
+sudo curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+  -o /etc/apt/keyrings/docker.asc
+sudo chmod a+r /etc/apt/keyrings/docker.asc
+
+sudo tee /etc/apt/sources.list.d/docker.sources <<EOF
+Types: deb
+URIs: https://download.docker.com/linux/ubuntu
+Suites: $(. /etc/os-release && echo "${UBUNTU_CODENAME}")
+Components: stable
+Architectures: $(dpkg --print-architecture)
+Signed-By: /etc/apt/keyrings/docker.asc
+EOF
+
+sudo apt update
+sudo apt install -y docker-ce docker-ce-cli containerd.io \
+  docker-buildx-plugin docker-compose-plugin</code></pre>
+  <pre><code>sudo docker run hello-world
+docker compose version</code></pre>
+
+  <h2 id="step3">3 — WireGuard on the VPS</h2>
+  <p>The VPS is the WireGuard <strong>server</strong>. It listens on UDP :51820.</p>
+  <pre><code>cd /etc/wireguard
+wg genkey | sudo tee privatekey | wg pubkey | sudo tee publickey
+sudo chmod 600 privatekey
+wg genpsk | sudo tee preshared.key && sudo chmod 600 preshared.key</code></pre>
+
+  <p>Create <code>/etc/wireguard/wg0.conf</code>:</p>
+  <pre><code>[Interface]
+PrivateKey = &lt;VPS_PRIVATE_KEY&gt;
+Address = 10.8.0.1/24
+ListenPort = 51820
+PostUp   = iptables -A FORWARD -i wg0 -j ACCEPT; iptables -t nat -A POSTROUTING -o eth0 -j MASQUERADE
+PostDown = iptables -D FORWARD -i wg0 -j ACCEPT; iptables -t nat -D POSTROUTING -o eth0 -j MASQUERADE
+
+[Peer]
+PublicKey = &lt;HOME_PUBLIC_KEY&gt;
+PresharedKey = &lt;PRESHARED_KEY&gt;
+AllowedIPs = 10.8.0.2/32</code></pre>
+  <pre><code>sudo wg-quick up wg0
+sudo systemctl enable wg-quick@wg0</code></pre>
+
+  <h2 id="step4">4 — WireGuard on the Home Server</h2>
+  <div class="callout callout-danger">
+    <strong>🔴 Critical for CGNAT</strong>
+    <code>PersistentKeepalive = 25</code> is mandatory. Without it, the CGNAT NAT mapping expires every ~60–120s and the tunnel silently drops.
+  </div>
+  <pre><code>[Interface]
+PrivateKey = &lt;HOME_PRIVATE_KEY&gt;
+Address = 10.8.0.2/24
+
+[Peer]
+PublicKey = &lt;VPS_PUBLIC_KEY&gt;
+PresharedKey = &lt;PRESHARED_KEY&gt;
+Endpoint = &lt;VPS_IP&gt;:51820
+AllowedIPs = 10.8.0.1/32
+PersistentKeepalive = 25</code></pre>
+  <pre><code># Test: from VPS, ping home server
+ping 10.8.0.2</code></pre>
+
+  <h2 id="step5">5 — Cloudflare DNS & TLS</h2>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Setting</th><th>Value</th></tr></thead>
+    <tbody>
+      <tr><td>SSL/TLS Mode</td><td>Full (Strict)</td></tr>
+      <tr><td>Minimum TLS</td><td>1.2</td></tr>
+      <tr><td>Always Use HTTPS</td><td>✅ On</td></tr>
+      <tr><td>WAF Managed Rules</td><td>✅ On</td></tr>
+      <tr><td>Bot Fight Mode</td><td>✅ On</td></tr>
+      <tr><td>Web service DNS</td><td>A → VPS IP, <strong>Proxied 🟠</strong></td></tr>
+      <tr><td>Game server DNS</td><td>A → VPS IP, <strong>DNS only ⬜</strong></td></tr>
+    </tbody>
+  </table></div>
+  <p>Generate a <strong>Cloudflare Origin Certificate</strong> (15-year) and save as <code>/etc/traefik/certs/origin.crt</code> and <code>origin.key</code>.</p>
+
+  <h2 id="step6">6 — Deploy Traefik on VPS</h2>
+  <p>Deploy from <code>cgnat/vps/</code>. Traefik handles HTTPS termination and routing to socat containers on the proxy network.</p>
+  <pre><code>cd cgnat/vps
+docker compose up -d
+
+# Check Traefik is up
+docker logs traefik --tail 20</code></pre>
+
+  <h2 id="step7">7 — Add a Service (Pattern)</h2>
+  <p>Every service follows the same 4-step pattern:</p>
+  <ol>
+    <li><strong>Home server:</strong> app container + <code>socat</code> binding on <code>10.8.0.2:&lt;port&gt;</code></li>
+    <li><strong>VPS:</strong> <code>socat</code> on the proxy network forwarding to <code>10.8.0.2:&lt;port&gt;</code></li>
+    <li><strong>VPS:</strong> Traefik router + service entry in <code>dynamic.yml</code></li>
+    <li><strong>Cloudflare:</strong> A record (proxied) pointing to VPS IP</li>
+  </ol>
+  <pre><code># dynamic.yml snippet
+http:
+  routers:
+    myservice:
+      rule: "Host(`service.example.com`)"
+      entryPoints: [websecure]
+      service: myservice
+      tls:
+        options: modern
+      middlewares: [security-headers, rate-limit]
+  services:
+    myservice:
+      loadBalancer:
+        servers:
+          - url: "http://socat-myservice:8080"</code></pre>
+
+  <h2 id="step8">8 — Hardening</h2>
+  <pre><code># Audit only
+bash scripts/harden-vps.sh --check
+
+# Apply (keep second SSH session open first!)
+sudo bash scripts/harden-vps.sh --apply</code></pre>
+  <div class="table-wrap"><table>
+    <thead><tr><th>Item</th><th>Value applied</th></tr></thead>
+    <tbody>
+      <tr><td>SSH port</td><td>2222</td></tr>
+      <tr><td>SSH auth</td><td>Key only, root login disabled</td></tr>
+      <tr><td>UFW :443</td><td>Cloudflare IPs only</td></tr>
+      <tr><td>fail2ban</td><td>max 3 retries, 1-day ban</td></tr>
+      <tr><td>Docker ICC</td><td>false (container isolation)</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="doc-nav">
+    <a href="/docs/" class="nav-prev">Documentation</a>
+    <a href="/docs/examples.html" class="nav-next">Examples</a>
+  </div>
+</div>
+<script src="/shared.js"></script>
+</body>
+</html>

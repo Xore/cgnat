@@ -1,0 +1,8 @@
+Filesystem      1K-blocks       Used  Available Use% Mounted on
+tmpfs            52786995     135168   52651827   1% /run
+/dev/nvme0n1p2  960378832  312441856  599061664  35% /
+tmpfs           263934976          0  263934976   0% /dev/shm
+tmpfs                5120          0       5120   0% /run/lock
+/dev/nvme0n1p1    1046528      13312    1033216   2% /boot/efi
+/dev/md0       3843760128 1245184000 2402320128  35% /data
+tmpfs            52786992          0   52786992   0% /run/user/1000

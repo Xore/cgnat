@@ -1,0 +1,59 @@
+# Python Flask blog served by Gunicorn (xore//blog frontend + REST API)
+# Dockge: place app.py, gunicorn.conf.py and the static/ folder in the
+# stack folder (e.g. /opt/stacks/python-api/)
+#
+# On first start the container installs dependencies automatically.
+# No Dockerfile needed.
+
+services:
+  python-api:
+    image: python:3.12-slim
+    container_name: python-api
+    restart: unless-stopped
+    working_dir: /app
+    volumes:
+      - ./app.py:/app/app.py:ro
+      - ./gunicorn.conf.py:/app/gunicorn.conf.py:ro
+      - ./static:/app/static:ro
+      # posts.json lives in a volume, not the repo
+      - blog-data:/app/data
+      # pip cache persisted so restarts are instant after first run
+      - pip-cache:/root/.cache/pip
+    # Use a list form so each argument is passed directly — no shell quoting issues
+    command:
+      - sh
+      - -c
+      - "pip install --quiet --root-user-action=ignore flask==3.0.3 gunicorn==23.0.0 && gunicorn -c gunicorn.conf.py app:app"
+    ports:
+      - 127.0.0.1:5000:5000
+    environment:
+      - ADMIN_PASSWORD=change-me-py
+      - DATA_FILE=/app/data/posts.json
+      - TZ=Europe/Berlin
+      - PYTHONDONTWRITEBYTECODE=1
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health', timeout=3)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 60s   # first start installs pip packages
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  socat-python-api:
+    image: alpine/socat:latest
+    container_name: socat-python-api
+    restart: unless-stopped
+    command: TCP4-LISTEN:5000,bind=10.8.0.2,fork,reuseaddr TCP4:127.0.0.1:5000
+    network_mode: host
+    depends_on:
+      python-api:
+        condition: service_healthy
+
+volumes:
+  blog-data:
+  pip-cache:

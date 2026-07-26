@@ -1,0 +1,43 @@
+services:
+  nginx-static:
+    image: nginx:alpine
+    container_name: nginx-static
+    restart: unless-stopped
+    volumes:
+      - ./html:/usr/share/nginx/html:ro
+    ports:
+      - "127.0.0.1:8080:80"
+    deploy:
+      resources:
+        limits:
+          cpus: '0.25'
+          memory: 64M
+
+  socat-static:
+    image: alpine/socat:latest
+    container_name: socat-static
+    restart: unless-stopped
+    command: TCP4-LISTEN:8080,bind=10.8.0.2,fork,reuseaddr TCP4:127.0.0.1:8080
+    network_mode: host
+    depends_on:
+      - nginx-static
+    deploy:
+      resources:
+        limits:
+          cpus: '0.10'
+          memory: 32M
+
+  # --- Add new app containers below this line ---
+  # myapi:
+  #   build: ./myapi
+  #   container_name: myapi
+  #   restart: unless-stopped
+  #   ports:
+  #     - "127.0.0.1:5000:5000"
+  #
+  # socat-myapi:
+  #   image: alpine/socat:latest
+  #   container_name: socat-myapi
+  #   restart: unless-stopped
+  #   command: TCP4-LISTEN:5000,bind=10.8.0.2,fork,reuseaddr TCP4:127.0.0.1:5000
+  #   network_mode: host

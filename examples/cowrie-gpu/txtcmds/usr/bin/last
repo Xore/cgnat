@@ -1,0 +1,8 @@
+root     pts/0        10.10.0.52       Sun Jul 19 13:44   still logged in
+root     pts/0        10.10.0.52       Sun Jul 19 09:12 - 11:30  (02:17)
+jdoe     pts/1        10.10.0.14       Sat Jul 18 16:03 - 18:41  (02:38)
+asmith   pts/0        10.10.0.11       Sat Jul 18 08:22 - 17:55  (09:32)
+root     pts/0        10.10.0.52       Fri Jul 17 22:10 - 23:58  (01:47)
+jdoe     pts/0        10.10.0.14       Fri Jul 17 09:00 - 18:12  (09:11)
+
+wtmp begins Tue Jul  1 00:00:01 2026

@@ -1,0 +1,17 @@
+# Generic reverse proxy — expose any LAN service, no app container needed.
+# Dockge: no extra files needed, just edit the socat command below.
+#
+# Replace 192.168.1.10 and 8123 with your upstream host and port.
+# The LISTEN port (first number) must match the upstream port for simplicity,
+# but can be different if needed.
+
+services:
+  socat-upstream:
+    image: alpine/socat:latest
+    container_name: socat-upstream
+    restart: unless-stopped
+    # Edit: upstream host:port (e.g. Home Assistant on 192.168.1.10:8123)
+    command: TCP4-LISTEN:8123,bind=10.8.0.2,fork,reuseaddr TCP4:192.168.1.10:8123
+    network_mode: host
+    environment:
+      - TZ=Europe/Berlin

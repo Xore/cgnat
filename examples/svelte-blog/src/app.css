@@ -1,0 +1,4 @@
+/* Svelte-blog theme entry.
+   The shared xore theme is copied into this project (see ./xore-theme.css)
+   so Vite/SvelteKit resolves it locally without reaching outside src/. */
+@import './xore-theme.css';

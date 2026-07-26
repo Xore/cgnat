@@ -1,0 +1,26 @@
+version: "3.9"
+
+services:
+  cowrie:
+    # Compatibility wrapper only. The integrated stack is the canonical Cowrie
+    # implementation so persona fixes cannot drift between two builds.
+    build: https://github.com/Xore/honeypot-stack.git#main:cowrie
+    container_name: cowrie-gpu
+    restart: unless-stopped
+    ports:
+      - "22:2222"
+      - "23:2223"
+    volumes:
+      # Log persistence
+      - cowrie-logs:/cowrie/cowrie-git/var/log/cowrie
+      - cowrie-dl:/cowrie/cowrie-git/var/lib/cowrie/downloads
+    environment:
+      - COWRIE_HOSTNAME=gpu01
+    cap_drop:
+      - ALL
+    security_opt:
+      - no-new-privileges:true
+
+volumes:
+  cowrie-logs:
+  cowrie-dl:

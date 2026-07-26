@@ -1,0 +1,19 @@
+[Unit]
+Description=Home-side fallback watcher for the VPS Suricata sshfs mount
+After=network-online.target wg-quick@wg0.service
+Wants=network-online.target wg-quick@wg0.service
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/suricata-mount-watcher.sh
+Restart=always
+RestartSec=30
+User=root
+
+# Disabled: setup-suricata-logs-home.sh installs an x-systemd.automount fstab
+# entry, which is the authoritative mechanism. Remove this condition only when
+# the watcher is deliberately installed on the HOME server as a fallback.
+ConditionPathExists=false
+
+[Install]
+WantedBy=multi-user.target

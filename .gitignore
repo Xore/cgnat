@@ -1,0 +1,6 @@
+.env
+wg0*.conf
+.DS_Store
+*.log
+node_modules/
+auth-backups/

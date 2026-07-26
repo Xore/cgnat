@@ -1,0 +1,43 @@
+# Go stdlib blog (xore//blog frontend embedded via go:embed) —
+# static binary in a scratch image (~10 MB)
+# Dockge: place main.go, go.mod, the static/ folder, Dockerfile and
+# .dockerignore in the stack folder (e.g. /opt/stacks/go-api/)
+#
+# Built from the Dockerfile (multi-stage: golang builder → scratch).
+
+services:
+  go-api:
+    build: .
+    image: go-blog-api:local
+    container_name: go-api
+    restart: unless-stopped
+    ports:
+      - 127.0.0.1:5003:5003
+    volumes:
+      # posts.json lives in a volume, not the repo
+      - blog-data:/data
+    environment:
+      - PORT=5003
+      - ADMIN_PASSWORD=change-me-go
+      - DATA_FILE=/data/posts.json
+      - TZ=Europe/Berlin
+    # Healthcheck is baked into the Dockerfile — the binary probes itself
+    # (scratch has no shell/wget)
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 64M
+
+  socat-go-api:
+    image: alpine/socat:latest
+    container_name: socat-go-api
+    restart: unless-stopped
+    command: TCP4-LISTEN:5003,bind=10.8.0.2,fork,reuseaddr TCP4:127.0.0.1:5003
+    network_mode: host
+    depends_on:
+      go-api:
+        condition: service_healthy
+
+volumes:
+  blog-data:

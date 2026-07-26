@@ -1,0 +1,4 @@
+/* Vue example entry point theme import.
+   The shared theme is copied into this project (see xore-theme.css)
+   so Vite resolves it locally without reaching outside the app root. */
+@import "./xore-theme.css";

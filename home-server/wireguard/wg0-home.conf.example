@@ -1,0 +1,15 @@
+# WireGuard Client Config — Home Server
+# Copy to /etc/wireguard/wg0.conf and fill in your keys
+
+[Interface]
+PrivateKey = <REPLACE_WITH_YOUR_WIREGUARD_PRIVATE_KEY>
+Address = 10.8.0.2/24
+MTU = 1280
+
+[Peer]
+PublicKey = <REPLACE_WITH_PEER_PUBLIC_KEY>
+PresharedKey = <REPLACE_WITH_PRESHARED_KEY>
+Endpoint = <YOUR_VPS_IP_OR_DOMAIN>:51820
+AllowedIPs = 10.8.0.1/32
+# Critical for CGNAT — keeps NAT mappings alive
+PersistentKeepalive = 25

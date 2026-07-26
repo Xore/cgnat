@@ -1,0 +1,31 @@
+# Uptime Kuma — self-hosted uptime monitoring
+# Dockge: no extra files needed, everything is self-contained.
+
+services:
+  uptime-kuma:
+    image: louislam/uptime-kuma:latest
+    container_name: uptime-kuma
+    restart: unless-stopped
+    volumes:
+      - uptime-kuma-data:/app/data
+    ports:
+      - 127.0.0.1:3001:3001
+    environment:
+      - TZ=Europe/Berlin
+    deploy:
+      resources:
+        limits:
+          cpus: "0.5"
+          memory: 256M
+
+  socat-uptime-kuma:
+    image: alpine/socat:latest
+    container_name: socat-uptime-kuma
+    restart: unless-stopped
+    command: TCP4-LISTEN:3001,bind=10.8.0.2,fork,reuseaddr TCP4:127.0.0.1:3001
+    network_mode: host
+    depends_on:
+      - uptime-kuma
+
+volumes:
+  uptime-kuma-data:

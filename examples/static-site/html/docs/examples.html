@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Examples — CGNAT Gateway</title>
+  <link rel="stylesheet" href="/shared.css" />
+  <style>
+    .ex-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+      margin: 16px 0 32px;
+    }
+    .ex-card {
+      background: var(--bg2);
+      border: 1px solid var(--border2);
+      border-radius: 8px;
+      padding: 18px;
+      transition: border-color .15s;
+    }
+    .ex-card:hover { border-color: var(--green); }
+    .ex-header { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
+    .ex-icon { font-size: 1.7rem; }
+    .ex-title { font-weight: 700; color: #e6edf3; font-size: 0.95rem; }
+    .ex-port { font-size: 0.75rem; color: var(--green); font-family: monospace; margin-top: 2px; }
+    .ex-desc { font-size: 0.84rem; color: var(--muted2); margin-bottom: 12px; }
+  </style>
+</head>
+<body>
+<div id="content">
+  <h1 class="page-title">Examples</h1>
+  <p class="page-subtitle">Copy-paste ready Dockge stacks. No Dockerfile needed — all use prebuilt images.</p>
+
+  <div class="callout callout-note">
+    <strong>💡 Dockge tip</strong>
+    Each stack lives in <code>/opt/stacks/&lt;name&gt;/</code>. Copy the files there, then hit <em>Deploy</em> in Dockge.
+  </div>
+
+  <h2 id="web">Web Hosting</h2>
+  <div class="ex-grid">
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">🌐</span>
+        <div><div class="ex-title">Static Site</div><div class="ex-port">:8080</div></div>
+      </div>
+      <div class="ex-desc">Nginx serving HTML/CSS/JS. Gzip, 1-year asset caching, SPA fallback. This very site.</div>
+      <pre><code>volumes:
+  - ./html:/usr/share/nginx/html:ro
+  - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro</code></pre>
+    </div>
+  </div>
+
+  <h2 id="apis">APIs</h2>
+  <div class="ex-grid">
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">🐍</span>
+        <div><div class="ex-title">Python Flask + Gunicorn</div><div class="ex-port">:5000</div></div>
+      </div>
+      <div class="ex-desc">Mount <code>app.py</code> + <code>gunicorn.conf.py</code>. Deps installed automatically via <code>pip install</code> in the command. Pip cache persisted as named volume.</div>
+      <pre><code>image: python:3.12-slim
+command: >
+  sh -c "pip install flask gunicorn
+         && gunicorn -c gunicorn.conf.py app:app"</code></pre>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">🟢</span>
+        <div><div class="ex-title">Node.js + Express</div><div class="ex-port">:3000</div></div>
+      </div>
+      <div class="ex-desc">Mount <code>app.js</code>. <code>node_modules</code> persisted as named volume. Runs as non-root <code>node</code> user.</div>
+      <pre><code>image: node:22-alpine
+command: >
+  sh -c "npm install express
+         && node app.js"</code></pre>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">🔴</span>
+        <div><div class="ex-title">Flask + Redis</div><div class="ex-port">:5001</div></div>
+      </div>
+      <div class="ex-desc">Multi-container. Redis is password-protected and network-isolated. Hit counter + key/value CRUD.</div>
+      <pre><code>REDIS_HOST=redis
+REDIS_PASSWORD=changeme
+# Change the password!</code></pre>
+    </div>
+  </div>
+
+  <h2 id="tools">Self-Hosted Tools</h2>
+  <div class="ex-grid">
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">📊</span>
+        <div><div class="ex-title">Uptime Kuma</div><div class="ex-port">:3001</div></div>
+      </div>
+      <div class="ex-desc">Uptime monitoring + public status page. Telegram, Discord, email alerts. No extra files needed.</div>
+      <pre><code>image: louislam/uptime-kuma:latest
+volumes:
+  - uptime-kuma-data:/app/data</code></pre>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">📂</span>
+        <div><div class="ex-title">File Browser</div><div class="ex-port">:8070</div></div>
+      </div>
+      <div class="ex-desc">Web file manager — browse, upload, download via HTTPS. Change the default <code>admin/admin</code> immediately.</div>
+      <pre><code>image: filebrowser/filebrowser:latest
+volumes:
+  - ./data:/srv
+  - filebrowser-db:/database</code></pre>
+    </div>
+
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">📡</span>
+        <div><div class="ex-title">Reverse Proxy</div><div class="ex-port">any</div></div>
+      </div>
+      <div class="ex-desc">socat only — no app container. Forward to any LAN host: Home Assistant, Proxmox, cameras, NAS.</div>
+      <pre><code>image: alpine/socat:latest
+command: TCP4-LISTEN:8123,bind=10.8.0.2,
+         fork,reuseaddr TCP4:192.168.1.10:8123</code></pre>
+    </div>
+  </div>
+
+  <h2 id="game">Game Servers</h2>
+  <div class="callout callout-note">
+    <strong>📌 DNS note</strong>
+    Game servers bypass Cloudflare — set the DNS record to <strong>DNS only (grey cloud)</strong>. TCP for Minecraft, UDP for CS2/Valheim.
+  </div>
+  <div class="ex-grid">
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">🎮</span>
+        <div><div class="ex-title">Minecraft (TCP)</div><div class="ex-port">:25565</div></div>
+      </div>
+      <pre><code>command: TCP4-LISTEN:25565,fork,reuseaddr
+         TCP4:10.8.0.2:25565
+ports:
+  - "25565:25565"</code></pre>
+    </div>
+    <div class="ex-card">
+      <div class="ex-header">
+        <span class="ex-icon">🔫</span>
+        <div><div class="ex-title">CS2 / Valheim (UDP)</div><div class="ex-port">:27015</div></div>
+      </div>
+      <pre><code>command: UDP4-LISTEN:27015,fork,reuseaddr
+         UDP4:10.8.0.2:27015
+ports:
+  - "27015:27015/udp"</code></pre>
+    </div>
+  </div>
+
+  <div class="doc-nav">
+    <a href="/docs/setup.html" class="nav-prev">Setup Guide</a>
+    <a href="/docs/performance.html" class="nav-next">Performance</a>
+  </div>
+</div>
+<script src="/shared.js"></script>
+</body>
+</html>

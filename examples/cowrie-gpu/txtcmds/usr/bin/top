@@ -1,0 +1,14 @@
+top - 13:47:22 up 19:23,  1 user,  load average: 18.42, 17.91, 16.88
+Tasks: 218 total,   3 running, 215 sleeping,   0 stopped,   0 zombie
+%Cpu(s): 14.2 us,  0.3 sy,  0.0 ni, 85.1 id,  0.2 wa,  0.0 hi,  0.2 si,  0.0 st
+MiB Mem : 515497.0 total,  81485.6 free, 108799.8 used, 325211.6 buff/cache
+MiB Swap:  32768.0 total,  32768.0 free,      0.0 used. 402401.0 avail Mem
+
+    PID USER      PR  NI    VIRT    RES    SHR S  %CPU  %MEM     TIME+ COMMAND
+   1848 root      20   0   4096g  15.5g   1.2g S   841   3.1  98:14.33 serve.py
+   1849 root      20   0   4096g  15.5g   1.2g S   912   3.1 107:22.01 serve.py
+   2103 root      20   0   3072m  12.0g 983040 S   112   2.4  13:41.22 train.py
+   2104 root      20   0   3072m  12.0g 983040 S    78   2.4  91:03.44 train.py
+   3201 root      20   0   98304   8192   4096 S     0   0.0   0:03.11 node_exporter
+   4401 jenkins   20   0   3200m 512000 131072 S     0   0.1   1:22.08 java
+   1847 root      20   0   2136m   2048m 131072 S     0   0.4   4:32.77 python3

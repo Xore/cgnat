@@ -1,0 +1,4 @@
+*.md
+.dockerignore
+Dockerfile
+docker-compose.yml
