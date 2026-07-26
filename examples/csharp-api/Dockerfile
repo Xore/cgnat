@@ -1,5 +1,5 @@
 # Multi-stage build: SDK to compile, slim ASP.NET runtime to serve
-FROM mcr.microsoft.com/dotnet/sdk:9.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
 WORKDIR /src
 
 # Restore first so the NuGet layer is cached between code changes
