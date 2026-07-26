@@ -1,0 +1,70 @@
+name: Code Quality
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  svelte-check:
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [examples/svelte-blog, examples/svelte-runes-playground]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+        working-directory: ${{ matrix.dir }}
+      # Type/diagnostic check via each project's own "check" script (svelte-check)
+      - run: npm run check
+        working-directory: ${{ matrix.dir }}
+
+  vue-build:
+    strategy:
+      fail-fast: false
+      matrix:
+        dir: [examples/vui-blog, examples/vui-blog-auth]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: npm ci
+        working-directory: ${{ matrix.dir }}
+      # No eslint config shipped with these examples — a production build
+      # via Vite/Vue's compiler still catches syntax and template errors.
+      - run: npm run build
+        working-directory: ${{ matrix.dir }}
+
+  node-syntax-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+      - run: node --check app.js && node --check public/app.js
+        working-directory: examples/node-express-api
+
+  ruff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/ruff-action@v3
+        with:
+          src: "./examples/python-api ./examples/redis-api"
+
+  clippy:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          components: clippy
+      - run: cargo clippy --manifest-path Cargo.toml -- -D warnings
+        working-directory: examples/rust-api
