@@ -367,6 +367,7 @@ install_docker() {
   curl -fsSL https://download.docker.com/linux/ubuntu/gpg -o /etc/apt/keyrings/docker.asc
   chmod a+r /etc/apt/keyrings/docker.asc
   # Source os-release HERE so UBUNTU_CODENAME/VERSION_CODENAME are available
+  # shellcheck disable=SC1091  # dynamic system file, not present in this repo
   . /etc/os-release
   local codename="${UBUNTU_CODENAME:-${VERSION_CODENAME:-}}"
   if [[ -z "$codename" ]]; then
