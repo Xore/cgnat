@@ -17,7 +17,7 @@ COPY static ./static
 COPY src ./src
 RUN touch src/main.rs && cargo build --release
 
-FROM alpine:3.21
+FROM alpine:3.24
 RUN adduser -D -H app && mkdir -p /data && chown app /data
 COPY --from=build /src/target/release/blog-api /usr/local/bin/blog-api
 
