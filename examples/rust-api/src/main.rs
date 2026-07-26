@@ -161,7 +161,7 @@ async fn login(State(state): State<SharedState>, Json(input): Json<LoginInput>) 
 async fn public_posts(State(state): State<SharedState>) -> impl IntoResponse {
     let posts = state.posts.read().unwrap();
     let mut out: Vec<Post> = posts.iter().filter(|p| p.published).cloned().collect();
-    out.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+    out.sort_by_key(|p| std::cmp::Reverse(p.created_at));
     Json(out)
 }
 
@@ -181,7 +181,7 @@ async fn admin_posts(State(state): State<SharedState>, headers: HeaderMap) -> Re
     }
     let posts = state.posts.read().unwrap();
     let mut out: Vec<Post> = posts.clone();
-    out.sort_by(|a, b| b.created_at.cmp(&a.created_at));
+    out.sort_by_key(|p| std::cmp::Reverse(p.created_at));
     Json(out).into_response()
 }
 

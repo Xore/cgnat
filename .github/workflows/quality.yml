@@ -17,7 +17,9 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: "20"
-      - run: npm ci
+      # svelte-runes-playground ships no package-lock.json, so use install
+      # rather than ci here.
+      - run: npm install
         working-directory: ${{ matrix.dir }}
       # Type/diagnostic check via each project's own "check" script (svelte-check)
       - run: npm run check
