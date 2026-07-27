@@ -34,6 +34,7 @@ cgnat/
 ├── docs/
 │   └── VPS-Guide.md                             # Complete setup guide
 ├── vps/
+│   ├── README.md                                # VPS stack + optional auth-portal add-on
 │   ├── docker-compose.yml                       # Traefik + socat bridges on VPS
 │   └── traefik/
 │       ├── traefik.yml                          # Traefik static config

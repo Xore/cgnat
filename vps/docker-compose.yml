@@ -42,35 +42,8 @@ services:
           cpus: "0.5"
           memory: 128M
 
-  # ===== AUTH PORTAL (optional add-on, not part of this repo) =====
-  # SSO/forward-auth for this stack's admin surfaces now lives in its own
-  # repository: https://github.com/Xore/auth-backend
-  #
-  # To add it back:
-  #   1. git clone https://github.com/Xore/auth-backend ./auth-backend
-  #   2. Copy its .env.example values into this stack's .env (COOKIE_SECRET,
-  #      AUTH_PASSWORD, etc. — see the auth-backend README for the full list)
-  #   3. Uncomment a service block below (or run auth-backend's own
-  #      docker-compose.yml as a separate stack on the `proxy` network) and
-  #      re-enable the `auth-portal` router + `forward-auth` middleware in
-  #      traefik/dynamic.yml
-  #
-  # auth-portal:
-  #   image: ghcr.io/xore/auth-backend:latest   # built by that repo's CI
-  #   container_name: auth-portal
-  #   restart: unless-stopped
-  #   environment:
-  #     - LISTEN_ADDR=:4181
-  #     - AUTH_HOST=${AUTH_HOST:-auth.xore.rocks}
-  #     - COOKIE_DOMAIN=${COOKIE_DOMAIN:-.xore.rocks}
-  #     - COOKIE_SECRET=${COOKIE_SECRET:?set COOKIE_SECRET in .env}
-  #     - AUTH_USERNAME=${AUTH_USERNAME:-admin}
-  #     - AUTH_PASSWORD=${AUTH_PASSWORD:?set AUTH_PASSWORD in .env}
-  #     - USERS_FILE=/data/users.json
-  #   volumes:
-  #     - auth-data:/data
-  #   networks:
-  #     - proxy
+  # SSO/forward-auth for this stack's admin surfaces is an optional add-on
+  # in its own repository — see README.md (Optional: auth portal).
 
   socat-uptime-kuma:
     image: alpine/socat:latest
@@ -270,4 +243,3 @@ networks:
 volumes:
   go-cache:
   suricata-rules:
-  auth-data:

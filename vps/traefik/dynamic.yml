@@ -32,15 +32,8 @@ http:
       service: api@internal
       middlewares: [local-only]
 
-    # auth-portal router lives with the auth-backend add-on — see
-    # https://github.com/Xore/auth-backend. Uncomment once it's deployed:
-    # auth-portal:
-    #   rule: "Host(`auth.xore.rocks`)"
-    #   entryPoints: [websecure]
-    #   service: auth-portal
-    #   tls:
-    #     options: modern
-    #   middlewares: [security-headers, rate-limit-auth]
+    # Optional SSO login router (auth.xore.rocks) lives with the auth-backend
+    # add-on — see vps/README.md for the snippet to add here.
 
     # www/apex/static routing points at the homepage, which now lives in its
     # own repo (https://github.com/Xore/www) with its own socat-homepage
@@ -143,12 +136,6 @@ http:
           - url: "http://socat-uptime-kuma:3001"
         passHostHeader: true
 
-    # auth-portal:
-    #   loadBalancer:
-    #     servers:
-    #       - url: "http://auth-portal:4181"
-    #     passHostHeader: true
-
     honeypot-web:
       loadBalancer:
         servers:
@@ -238,9 +225,10 @@ http:
         sourceCriterion:
           requestHeaderName: CF-Connecting-IP
 
-    # Requires the auth-portal service (see the commented block above) from
-    # the optional https://github.com/Xore/auth-backend add-on. Any router
-    # using this middleware will fail to authenticate until that's deployed.
+    # Requires the auth-portal container from the optional
+    # https://github.com/Xore/auth-backend add-on (deploy it on the `proxy`
+    # network — see vps/README.md). Fail-closed: any router using this
+    # middleware returns 5xx until that's deployed.
     forward-auth:
       forwardAuth:
         address: "http://auth-portal:4181/_auth/verify"

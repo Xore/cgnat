@@ -42,14 +42,19 @@ SSO is **not part of this repo**. It lives in its own repository,
 [Xore/auth-backend](https://github.com/Xore/auth-backend), so this repo stays a
 standalone tunnel/reverse-proxy setup with no auth coupling.
 
-1. Clone it next to this stack and follow its README to build/run
-   `auth-portal` on the `proxy` network (either as its own Compose project, or
-   folded into `/root/vps/docker-compose.yml` using the commented-out
-   `auth-portal` service block in [`vps/docker-compose.yml`](../vps/docker-compose.yml)).
-2. Copy the env vars from auth-backend's `.env.example` into `/root/vps/.env`.
-3. Uncomment the `auth-portal` router, service, and `forward-auth` middleware
-   in [`vps/traefik/dynamic.yml`](../vps/traefik/dynamic.yml) — they're left in
-   place, commented, with instructions. Any router using `forward-auth` then
+1. Clone it and deploy with its own install files (`docker-compose.yml` +
+   `.env.example` — set `COOKIE_SECRET`, `AUTH_PASSWORD`, etc. there):
+   ```bash
+   git clone https://github.com/Xore/auth-backend
+   cd auth-backend && cp .env.example .env   # edit values
+   docker compose up -d --build auth-portal
+   ```
+   Its `auth-portal` container joins this stack's `proxy` network.
+2. Add the `auth-portal` router + service to
+   [`vps/traefik/dynamic.yml`](../vps/traefik/dynamic.yml) — the snippet is in
+   [`vps/README.md`](../vps/README.md). The `forward-auth` middleware is
+   already defined and attached to the honeypot UI routers; it is fail-closed
+   (5xx) until `auth-portal` is running. Any router using `forward-auth` then
    needs a login.
 
 For account deletion, password/TOTP/passkey recovery, or a complete
