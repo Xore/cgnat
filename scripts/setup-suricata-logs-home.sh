@@ -83,7 +83,13 @@ mountpoint "${MOUNT_TARGET}"
 # ---------------------------------------------------------------------------
 echo "[6/6] Persisting mount in /etc/fstab..."
 
-FSTAB_LINE="root@${VPS_WG_IP}:${REMOTE_PATH}  ${MOUNT_TARGET}  fuse.sshfs  ro,allow_other,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=${SSH_KEY},port=${SSH_PORT},StrictHostKeyChecking=yes,PasswordAuthentication=no,PreferredAuthentications=publickey,_netdev,x-systemd.automount  0  0"
+# NOTE: deliberately NO x-systemd.automount. An autofs direct mount can only be
+# triggered by processes with CAP_SYS_ADMIN over the host mount namespace —
+# Docker containers get EPERM ("Operation not permitted") instead. The mount
+# must be established before `docker compose up` so the containers' bind mounts
+# capture it (the dashboard's /logs volume uses rslave propagation so later
+# host-side remounts still propagate in).
+FSTAB_LINE="root@${VPS_WG_IP}:${REMOTE_PATH}  ${MOUNT_TARGET}  fuse.sshfs  ro,allow_other,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=${SSH_KEY},port=${SSH_PORT},StrictHostKeyChecking=yes,PasswordAuthentication=no,PreferredAuthentications=publickey,_netdev  0  0"
 
 if grep -qF "${MOUNT_TARGET}" /etc/fstab; then
   echo "  -> fstab entry already exists, skipping."

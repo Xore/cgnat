@@ -66,8 +66,9 @@ Color-coded per item:
 - `setup-suricata-logs-{vps,home}.sh` and `setup-portbridge-log-home.sh` use the
   shared `/opt/stacks/honeypot-stack/logs/...` paths and management SSH port 2222.
 - `suricata-mount-watcher.{sh,service}` is only a disabled home-side fallback.
-  The supported live setup is the `/etc/fstab` `x-systemd.automount` installed
-  by `setup-suricata-logs-home.sh`; do not enable both mechanisms.
+  The supported live setup is the `/etc/fstab` `_netdev` sshfs mount installed
+  by `setup-suricata-logs-home.sh` (no `x-systemd.automount` — autofs triggers
+  return EPERM to container processes); do not enable both mechanisms.
 
 Cowrie files under `cowrie/honeyfs/` in the honeypot repository that end in
 `.sh` or `.ps1` are inert attacker-facing decoy content, not administrator

@@ -67,7 +67,7 @@ if mountpoint -q "${MOUNT_TARGET}"; then
 fi
 
 sshfs \
-  -o ro,allow_other,reconnect \
+  -o ro,allow_other,reconnect,cache=no \
   -o ServerAliveInterval=15,ServerAliveCountMax=3 \
   -o StrictHostKeyChecking=yes \
   -o PasswordAuthentication=no \
@@ -82,7 +82,18 @@ echo "  -> mounted."
 
 # ---------------------------------------------------------------------------
 echo "[6/6] Persisting mount in /etc/fstab..."
-FSTAB_LINE="root@${VPS_WG_IP}:${REMOTE_PATH}  ${MOUNT_TARGET}  fuse.sshfs  ro,allow_other,reconnect,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=${SSH_KEY},port=${SSH_PORT},StrictHostKeyChecking=yes,PasswordAuthentication=no,PreferredAuthentications=publickey,_netdev,x-systemd.automount  0  0"
+# NOTE: deliberately NO x-systemd.automount. An autofs direct mount can only be
+# triggered by processes with CAP_SYS_ADMIN over the host mount namespace —
+# Docker containers get EPERM ("Operation not permitted") instead, which left
+# the dashboard unable to read portbridge.json and every sensor stuck on the
+# tunnel peer IP 10.8.0.1. The mount must be established before
+# `docker compose up` so the containers' bind mounts capture it (the
+# dashboard's /logs volume uses rslave propagation so later host-side remounts
+# still propagate in).
+# cache=no: the dashboard re-reads the tail of portbridge.json every minute to
+# join cowrie/dionaea sessions against real attacker IPs; sshfs data caching
+# would delay fresh entries and leave new events stuck on 10.8.0.1.
+FSTAB_LINE="root@${VPS_WG_IP}:${REMOTE_PATH}  ${MOUNT_TARGET}  fuse.sshfs  ro,allow_other,reconnect,cache=no,ServerAliveInterval=15,ServerAliveCountMax=3,IdentityFile=${SSH_KEY},port=${SSH_PORT},StrictHostKeyChecking=yes,PasswordAuthentication=no,PreferredAuthentications=publickey,_netdev  0  0"
 
 if grep -qF "${MOUNT_TARGET}" /etc/fstab; then
   echo "  -> fstab entry already present, skipping."
@@ -99,7 +110,7 @@ cat <<EOF
   Mount  : ${MOUNT_TARGET}
   Source : root@${VPS_WG_IP}:${REMOTE_PATH}
   Key    : ${SSH_KEY}   Port: ${SSH_PORT}
-  Mode   : read-only, auto-reconnect, systemd automount
+  Mode   : read-only, auto-reconnect, mounted at boot via fstab (_netdev)
 
   The honeypot dashboard reads /logs recursively, so
   portbridge.json now appears within ~15s and real
